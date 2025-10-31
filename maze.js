@@ -179,6 +179,13 @@ class Maze {
                 currentCell = randomNeighborCell;
                 currentCell.visited = true;
             } else {
+                let randomInt = randomInteger(1,4); 
+                  if(randomInt === 1){
+                     let randomLocation = randomInteger(0, stack.length);
+                     currentCell = stack[randomLocation];
+                     //stack.splice(randomLocation);
+                     currentCell = stack.pop();
+                  }
                 currentCell = stack.pop();
             }
         }
