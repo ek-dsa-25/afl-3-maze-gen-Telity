@@ -15,15 +15,24 @@ class Cell {
             left: true,
         };
         this.visited = false;
+        this.emoji = null; // Will hold emoji if cell has one
+        this.backgroundColor = null; // Optional background color
     }
 
     draw(ctx, cellWidth) {
+        const px = this.x * cellWidth;
+        const py = this.y * cellWidth;
+
+        // Draw background color if set
+        if (this.backgroundColor) {
+            ctx.fillStyle = this.backgroundColor;
+            ctx.fillRect(px, py, cellWidth, cellWidth);
+        }
+
+        // Draw walls
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 4;
         ctx.beginPath();
-
-        const px = this.x * cellWidth;
-        const py = this.y * cellWidth;
 
         ctx.moveTo(px, py);
 
@@ -52,6 +61,15 @@ class Cell {
         }
 
         ctx.stroke();
+
+        // Draw emoji if set
+        if (this.emoji) {
+            ctx.font = `${cellWidth * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#000000';
+            ctx.fillText(this.emoji, px + cellWidth / 2, py + cellWidth / 2);
+        }
     }
 
     // find naboerne i grid vha. this.x og this.y
@@ -134,6 +152,16 @@ class Maze {
         this.ctx = canvas.getContext('2d');
         this.cellWidth = canvas.width / cols;
         this.initializeGrid();
+
+        // Emoji themes - collections of related emojis
+        this.emojiThemes = {
+            treasure: ['💎', '👑', '🏆', '💰', '🗝️'],
+            nature: ['🌸', '🌺', '🌻', '🌹', '🍄'],
+            food: ['🍕', '🍔', '🍰', '🍪', '🍩'],
+            animals: ['🐱', '🐶', '🐸', '🦊', '🐼'],
+            space: ['🌟', '⭐', '🌙', '☀️', '🪐'],
+            spooky: ['👻', '🎃', '🦇', '🕷️', '💀']
+        };
     }
 
     initializeGrid() {
@@ -149,6 +177,28 @@ class Maze {
         for (let i = 0; i < this.rows; i += 1) {
             for (let j = 0; j < this.cols; j += 1) {
                 this.grid[i][j].draw(this.ctx, this.cellWidth);
+            }
+        }
+    }
+
+    // Add emojis to random cells
+    decorateWithEmojis(theme = 'treasure', density = 0.15) {
+        const themeEmojis = this.emojiThemes[theme] || this.emojiThemes.treasure;
+        const totalCells = this.cols * this.rows;
+        const numberOfEmojis = Math.floor(totalCells * density);
+
+        for (let i = 0; i < numberOfEmojis; i++) {
+            const randomX = randomInteger(0, this.cols);
+            const randomY = randomInteger(0, this.rows);
+            const cell = this.grid[randomX][randomY];
+
+            // Pick random emoji from theme
+            const randomEmoji = themeEmojis[randomInteger(0, themeEmojis.length)];
+            cell.emoji = randomEmoji;
+
+            // Optionally add subtle background color
+            if (Math.random() > 0.5) {
+                cell.backgroundColor = `rgba(255, 255, 200, 0.3)`;
             }
         }
     }
@@ -194,12 +244,62 @@ class Maze {
 
 document.addEventListener('DOMContentLoaded', () => {
     const canvas = document.getElementById('canvas');
-    const maze = new Maze(20, 20, canvas);
+    const themeSelect = document.getElementById('theme');
+    const densitySlider = document.getElementById('density');
+    const densityValue = document.getElementById('densityValue');
+    const regenerateBtn = document.getElementById('regenerate');
+    const currentThemeDisplay = document.getElementById('currentTheme');
 
-    // TODO: Fjern nogle af væggene på en smart måde.
-    maze.generate();
+    const themes = ['treasure', 'nature', 'food', 'animals', 'space', 'spooky'];
 
-    maze.draw();
+    // Update density display
+    densitySlider.addEventListener('input', (e) => {
+        const value = (parseFloat(e.target.value) * 100).toFixed(0);
+        densityValue.textContent = `${value}%`;
+    });
 
-    console.log(maze);
+    // Function to generate maze
+    function generateMaze() {
+        // Clear canvas
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Create new maze
+        const maze = new Maze(20, 20, canvas);
+        maze.generate();
+
+        // Get selected theme or random
+        let selectedTheme = themeSelect.value;
+        if (selectedTheme === 'random') {
+            selectedTheme = themes[randomInteger(0, themes.length)];
+        }
+
+        // Get density
+        const density = parseFloat(densitySlider.value);
+
+        // Decorate with emojis
+        maze.decorateWithEmojis(selectedTheme, density);
+
+        // Draw the maze
+        maze.draw();
+
+        // Update theme display
+        const themeEmoji = {
+            treasure: '💎',
+            nature: '🌸',
+            food: '🍕',
+            animals: '🐱',
+            space: '🌟',
+            spooky: '👻'
+        };
+        currentThemeDisplay.textContent = `Nuværende tema: ${themeEmoji[selectedTheme]} ${selectedTheme.charAt(0).toUpperCase() + selectedTheme.slice(1)}`;
+
+        console.log(`Generated maze with theme: ${selectedTheme}, density: ${density}`);
+    }
+
+    // Generate initial maze
+    generateMaze();
+
+    // Regenerate on button click
+    regenerateBtn.addEventListener('click', generateMaze);
 })

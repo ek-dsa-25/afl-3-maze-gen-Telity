@@ -6,10 +6,109 @@
     <title>Maze Generator</title>
 </head>
 <body>
-    <canvas id="canvas" width="800" height="800"></canvas>
+    <div class="container">
+        <h1>🎨 Personlig Labyrint Generator</h1>
+
+        <div class="controls">
+            <label for="theme">Vælg tema:</label>
+            <select id="theme">
+                <option value="random">🎲 Tilfældigt</option>
+                <option value="treasure">💎 Skatte</option>
+                <option value="nature">🌸 Natur</option>
+                <option value="food">🍕 Mad</option>
+                <option value="animals">🐱 Dyr</option>
+                <option value="space">🌟 Rummet</option>
+                <option value="spooky">👻 Uhyggelig</option>
+            </select>
+
+            <label for="density">Emoji tæthed:</label>
+            <input type="range" id="density" min="0" max="0.3" step="0.05" value="0.15">
+            <span id="densityValue">15%</span>
+
+            <button id="regenerate">🔄 Generer ny labyrint</button>
+        </div>
+
+        <canvas id="canvas" width="800" height="800"></canvas>
+        <p id="currentTheme"></p>
+    </div>
+
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        select, button {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: 2px solid #667eea;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        input[type="range"] {
+            width: 150px;
+        }
+
         canvas#canvas {
-            border: 1px solid gray;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            display: block;
+            margin: 0 auto;
+            background: white;
+        }
+
+        #currentTheme {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+            margin-top: 15px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #333;
         }
     </style>
     <script src="maze.js"></script>
